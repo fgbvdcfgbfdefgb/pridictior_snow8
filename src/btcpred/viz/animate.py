@@ -93,6 +93,9 @@ class ReplayAnimator:
             self.l_pred.append(ln)
         self.band = None
         self.vline = ax.axvline(0, color="#64748b", lw=1.0, ls="--", alpha=0.8, zorder=5)
+        # faint wash over the forecast region so "past" and "future" read apart
+        self.fzone = ax.axvspan(0, self.H / 60.0 * 1.02, color="#4ea8ff",
+                                alpha=0.045, lw=0, zorder=1)
         self.now_dot = ax.scatter([], [], s=34, color=ACTUAL, zorder=9,
                                   edgecolors=BG, linewidths=1.0)
         ax.legend(loc="upper left", ncols=min(self.M + 2, 4), framealpha=0.0,
@@ -160,7 +163,10 @@ class ReplayAnimator:
         if len(self.qs) >= 3:
             lo_p = p_now * np.exp(np.clip(self.preds[:, k, 0].astype(np.float64), -.5, .5))
             hi_p = p_now * np.exp(np.clip(self.preds[:, k, -1].astype(np.float64), -.5, .5))
-            lo_b, hi_b = lo_p.min(axis=0), hi_p.max(axis=0)
+            # average the members' bands rather than taking their union: the
+            # union is dominated by whichever model is least confident and
+            # renders as an opaque blob that hides the forecasts themselves
+            lo_b, hi_b = lo_p.mean(axis=0), hi_p.mean(axis=0)
             self.band = self.ax.fill_between(hx, lo_b, hi_b, color="#4ea8ff",
                                              alpha=0.09, lw=0, zorder=2)
             ymin, ymax = min(ymin, lo_b.min()), max(ymax, hi_b.max())
@@ -198,7 +204,7 @@ class ReplayAnimator:
         idx = list(range(0, len(self.times), frame_stride))
         writer = imageio.get_writer(
             str(path), fps=self.fps, codec="libx264", quality=quality,
-            macro_block_size=8, ffmpeg_params=["-pix_fmt", "yuv420p"])
+            macro_block_size=8, pixelformat="yuv420p")
         try:
             for n, k in enumerate(idx):
                 self._draw(k)
