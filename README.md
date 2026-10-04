@@ -282,7 +282,29 @@ pridictior_snow8/
 
 ---
 
-## 6. Expectations, stated plainly
+## 6. Hold out a period before you believe any number
+
+Cursors advance one second at a time, so **consecutive training batches overlap
+almost entirely**. The `hit` and `nrmse` printed during training are therefore
+measured on tape the model has just been updated on, and they look far better
+than reality — a short demo run reports ~75% directional accuracy, which is not
+a generalisation estimate and should not be read as one.
+
+Always reserve the tail of the history and score there:
+
+```bash
+# train on everything before 2026-09-01
+torchrun --nproc_per_node=4 scripts/train.py --store /tmp/btcstore \
+    --out runs/pop --train-end 2026-09-01 --max-hours 8
+
+# score on September, which the model has never seen
+python scripts/render_video.py --store /tmp/btcstore --ckpt-dir runs/pop \
+    --day 2026-09-14 --out media/holdout.mp4
+```
+
+The scorecard written next to the video is the honest number.
+
+## 7. Expectations, stated plainly
 
 Second-scale crypto forecasting is close to the noise floor. A genuinely useful
 model lands a few points above 50% directional accuracy on the 25-minute move,
@@ -294,7 +316,7 @@ the structural guard.
 
 Nothing here is financial advice or a trading system.
 
-## 7. Tests
+## 8. Tests
 
 ```bash
 python tests/test_feature_parity.py   # vectorised vs streaming, causality

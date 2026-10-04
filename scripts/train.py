@@ -60,6 +60,11 @@ def main() -> int:
     ap.add_argument("--log-every", type=int, default=25)
     ap.add_argument("--ckpt-every", type=int, default=2000)
     ap.add_argument("--seed", type=int, default=1234)
+    ap.add_argument("--train-start", default=None,
+                    help="YYYY-MM-DD; restrict cursors to on/after this date")
+    ap.add_argument("--train-end", default=None,
+                    help="YYYY-MM-DD; hold everything from here out of training "
+                         "so render_video.py can score on unseen tape")
     ap.add_argument("--variant", default=None,
                     help="force one recipe by name: base|deep|wide|agile|micro|nano")
     ap.add_argument("--n-variants", type=int, default=None,
@@ -84,10 +89,15 @@ def main() -> int:
         cfg, lw, opt = pop[rank % len(pop)]
 
     cfg = ModelConfig(**{**cfg.to_dict(), "context": a.context, "horizon": a.horizon})
+    from datetime import datetime, timezone
+    to_ts = lambda d: int(datetime.fromisoformat(d).replace(
+        tzinfo=timezone.utc).timestamp())
     tcfg = TrainConfig(
         batch=a.batch, stride=a.stride, lr=opt["lr"], weight_decay=opt["weight_decay"],
         max_steps=a.max_steps, max_hours=a.max_hours, amp=a.amp, compile=a.compile,
-        log_every=a.log_every, ckpt_every=a.ckpt_every, seed=a.seed)
+        log_every=a.log_every, ckpt_every=a.ckpt_every, seed=a.seed,
+        t_start=to_ts(a.train_start) if a.train_start else None,
+        t_stop=to_ts(a.train_end) if a.train_end else None)
 
     out = Path(a.out) / cfg.name
     out.mkdir(parents=True, exist_ok=True)
@@ -99,6 +109,7 @@ def main() -> int:
         "d_model": cfg.d_model, "depth": cfg.depth, "n_basis": cfg.n_basis,
         "lr": opt["lr"], "stability_w": lw.stability, "batch": a.batch,
         "trainable_seconds": tr.sim.n_trainable_seconds,
+        "train_window": f"{utc(tr.sim.lo)}..{utc(tr.sim.hi)}",
         "store": f"{utc(store.t0)}..{utc(store.t_end)}",
     }), flush=True)
 
