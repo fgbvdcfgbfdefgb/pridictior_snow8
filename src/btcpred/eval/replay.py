@@ -156,14 +156,30 @@ def score(res: Dict[str, np.ndarray], window: int = 60) -> Dict[str, np.ndarray]
     jump[:, 1:] = np.abs(med[:, 1:, -1] - med[:, :-1, -1]) / scale[None, 1:]
 
     def roll(x, w):
-        k = np.ones(w, dtype=np.float32) / w
-        return np.stack([np.convolve(r, k, mode="full")[:len(r)] for r in x])
+        """Trailing mean over <= w samples, normalised by how many exist.
 
+        A plain convolution divides by the full window even at the start, so
+        every curve would ramp up from zero for the first w frames and look
+        like the models were failing. Dividing by the true count makes the
+        opening frames an expanding average instead.
+        """
+        k = np.ones(w, dtype=np.float32)
+        den = np.convolve(np.ones(x.shape[1], dtype=np.float32), k,
+                          mode="full")[:x.shape[1]]
+        return np.stack([np.convolve(r, k, mode="full")[:x.shape[1]] / den
+                         for r in x])
+
+    roll_nrmse = roll(nrmse, window)
     return {
         "nrmse": nrmse, "dir_hit": hit, "endpoint": endpoint, "jump": jump,
-        "roll_hit": roll(hit, window), "roll_nrmse": roll(nrmse, window),
-        "acc": 100.0 * np.clip(1.0 - nrmse, 0.0, 1.0),
-        "roll_acc": 100.0 * np.clip(1.0 - roll(nrmse, window), 0.0, 1.0),
+        "roll_hit": roll(hit, window), "roll_nrmse": roll_nrmse,
+        # Skill against the "price won't move" baseline, whose nRMSE is 1 by
+        # construction. exp(-nRMSE) keeps this smooth and bounded instead of
+        # clipping to a flat zero the moment a model is worse than baseline,
+        # which is exactly when you most want to see the difference.
+        "acc": 100.0 * np.exp(-nrmse),
+        "roll_acc": 100.0 * np.exp(-roll_nrmse),
+        "skill": 100.0 * (1.0 - nrmse),
     }
 
 

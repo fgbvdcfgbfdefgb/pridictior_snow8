@@ -34,7 +34,8 @@ from btcpred.viz.animate import ReplayAnimator  # noqa: E402
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--store", required=True)
+    ap.add_argument("--store", default=None,
+                    help="materialised store; not needed with --load-npz")
     ap.add_argument("--ckpt-dir", default="runs/pop")
     ap.add_argument("--ckpt", nargs="*", default=None)
     ap.add_argument("--out", default="media/replay.mp4")
@@ -51,8 +52,33 @@ def main() -> int:
     ap.add_argument("--roll", type=int, default=60, help="rolling metric window")
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--no-ema", action="store_true")
-    ap.add_argument("--save-npz", default=None)
+    ap.add_argument("--save-npz", default=None,
+                    help="cache the replay tensors so the plot can be "
+                         "re-rendered without re-running the models")
+    ap.add_argument("--load-npz", default=None,
+                    help="re-render from a --save-npz cache; skips model "
+                         "loading and the replay entirely")
     a = ap.parse_args()
+    if not a.store and not a.load_npz:
+        ap.error("--store is required unless you pass --load-npz")
+
+    if a.load_npz:
+        # Pure re-render path: everything needed for the figure is in the
+        # cache, so no store, no checkpoints and no forward passes.
+        z = np.load(a.load_npz)
+        res = {k: z[k] for k in z.files}
+        res["model_names"] = [str(x) for x in res["model_names"]]
+        # keep the boxed 1-element arrays exactly as replay_day emits them;
+        # score() indexes them. Only the sidecar wants a plain int.
+        if "pred_stride" in res:
+            a.pred_stride = int(np.asarray(res["pred_stride"]).reshape(-1)[0])
+        sc = score(res, window=a.roll)
+        rep = summary(res, sc)
+        print(json.dumps(rep, indent=2), flush=True)
+        t0 = int(res["times"][0])
+        t1 = int(res["times"][-1])
+        _render(res, sc, rep, a, t0, t1)
+        return 0
 
     dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     store = MarketStore(a.store)
@@ -95,6 +121,12 @@ def main() -> int:
     if a.save_npz:
         np.savez_compressed(a.save_npz, **res)
 
+    _render(res, sc, rep, a, t0, t1)
+    return 0
+
+
+def _render(res, sc, rep, a, t0, t1):
+    """Draw the animation and drop the scorecard sidecar next to it."""
     w, h = (float(x) for x in a.figsize.lower().split("x"))
     day = datetime.fromtimestamp(t0, timezone.utc).strftime("%d %b %Y")
     anim = ReplayAnimator(res, sc, lookback=a.lookback_min * 60, fps=a.fps,
@@ -108,7 +140,6 @@ def main() -> int:
         {"session_start": utc(t0), "session_end": utc(t1),
          "pred_stride_s": a.pred_stride, "frames": nfr, "fps": a.fps,
          "models": rep}, indent=2))
-    return 0
 
 
 if __name__ == "__main__":

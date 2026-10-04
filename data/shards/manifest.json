@@ -1,0 +1,669 @@
+{
+  "symbol": "BTCUSDT",
+  "interval": "1s",
+  "format": "btcz1",
+  "built": "2026-10-04T06:31:20.617129+00:00",
+  "months": [
+    {
+      "month": "2020-01",
+      "status": "cached",
+      "bytes": 25941093
+    },
+    {
+      "month": "2020-02",
+      "status": "cached",
+      "bytes": 26385227
+    },
+    {
+      "month": "2020-03",
+      "status": "cached",
+      "bytes": 30371829
+    },
+    {
+      "month": "2020-04",
+      "status": "cached",
+      "bytes": 26447914
+    },
+    {
+      "month": "2020-05",
+      "status": "cached",
+      "bytes": 29467709
+    },
+    {
+      "month": "2020-06",
+      "status": "cached",
+      "bytes": 23582222
+    },
+    {
+      "month": "2020-07",
+      "status": "cached",
+      "bytes": 24384464
+    },
+    {
+      "month": "2020-08",
+      "status": "cached",
+      "bytes": 28215607
+    },
+    {
+      "month": "2020-09",
+      "status": "cached",
+      "bytes": 25516517
+    },
+    {
+      "month": "2020-10",
+      "status": "cached",
+      "bytes": 23537250
+    },
+    {
+      "month": "2020-11",
+      "status": "cached",
+      "bytes": 29702709
+    },
+    {
+      "month": "2020-12",
+      "status": "cached",
+      "bytes": 31814298
+    },
+    {
+      "month": "2021-01",
+      "status": "cached",
+      "bytes": 38850287
+    },
+    {
+      "month": "2021-02",
+      "status": "cached",
+      "bytes": 34750823
+    },
+    {
+      "month": "2021-03",
+      "status": "cached",
+      "bytes": 36647091
+    },
+    {
+      "month": "2021-04",
+      "status": "cached",
+      "bytes": 33508297
+    },
+    {
+      "month": "2021-05",
+      "status": "cached",
+      "bytes": 38596824
+    },
+    {
+      "month": "2021-06",
+      "status": "cached",
+      "bytes": 34458526
+    },
+    {
+      "month": "2021-07",
+      "status": "cached",
+      "bytes": 30960572
+    },
+    {
+      "month": "2021-08",
+      "status": "cached",
+      "bytes": 32206275
+    },
+    {
+      "month": "2021-09",
+      "status": "ok",
+      "bytes": 30687800,
+      "n": 2592000,
+      "n_valid": 2584800,
+      "gap_pct": 0.2778,
+      "source": "monthly"
+    },
+    {
+      "month": "2021-10",
+      "status": "ok",
+      "bytes": 32704497,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2021-11",
+      "status": "ok",
+      "bytes": 31476554,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2021-12",
+      "status": "ok",
+      "bytes": 31316951,
+      "n": 2678400,
+      "n_valid": 2678359,
+      "gap_pct": 0.0015,
+      "source": "monthly"
+    },
+    {
+      "month": "2022-01",
+      "status": "ok",
+      "bytes": 30543540,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2022-02",
+      "status": "ok",
+      "bytes": 26224946,
+      "n": 2419200,
+      "n_valid": 2419200,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2022-03",
+      "status": "ok",
+      "bytes": 27321509,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2022-04",
+      "status": "ok",
+      "bytes": 24486437,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2022-05",
+      "status": "ok",
+      "bytes": 27839916,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2022-06",
+      "status": "ok",
+      "bytes": 27549078,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2022-07",
+      "status": "ok",
+      "bytes": 35579444,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2022-08",
+      "status": "ok",
+      "bytes": 38139925,
+      "n": 2678400,
+      "n_valid": 2678392,
+      "gap_pct": 0.0003,
+      "source": "monthly"
+    },
+    {
+      "month": "2022-09",
+      "status": "ok",
+      "bytes": 37223932,
+      "n": 2592000,
+      "n_valid": 2591964,
+      "gap_pct": 0.0014,
+      "source": "monthly"
+    },
+    {
+      "month": "2022-10",
+      "status": "ok",
+      "bytes": 36848386,
+      "n": 2678400,
+      "n_valid": 2677841,
+      "gap_pct": 0.0209,
+      "source": "monthly"
+    },
+    {
+      "month": "2022-11",
+      "status": "ok",
+      "bytes": 36400828,
+      "n": 2592000,
+      "n_valid": 2590287,
+      "gap_pct": 0.0661,
+      "source": "monthly"
+    },
+    {
+      "month": "2022-12",
+      "status": "ok",
+      "bytes": 34791672,
+      "n": 2678400,
+      "n_valid": 2676494,
+      "gap_pct": 0.0712,
+      "source": "monthly"
+    },
+    {
+      "month": "2023-01",
+      "status": "ok",
+      "bytes": 37221026,
+      "n": 2678400,
+      "n_valid": 2676454,
+      "gap_pct": 0.0727,
+      "source": "monthly"
+    },
+    {
+      "month": "2023-02",
+      "status": "ok",
+      "bytes": 34551122,
+      "n": 2419200,
+      "n_valid": 2418466,
+      "gap_pct": 0.0303,
+      "source": "monthly"
+    },
+    {
+      "month": "2023-03",
+      "status": "ok",
+      "bytes": 35202007,
+      "n": 2678400,
+      "n_valid": 2672309,
+      "gap_pct": 0.2274,
+      "source": "monthly"
+    },
+    {
+      "month": "2023-04",
+      "status": "ok",
+      "bytes": 23196565,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2023-05",
+      "status": "ok",
+      "bytes": 22495148,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2023-06",
+      "status": "ok",
+      "bytes": 21535192,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2023-07",
+      "status": "ok",
+      "bytes": 19719473,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2023-08",
+      "status": "ok",
+      "bytes": 19480100,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2023-09",
+      "status": "ok",
+      "bytes": 19089286,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2023-10",
+      "status": "ok",
+      "bytes": 22233498,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2023-11",
+      "status": "ok",
+      "bytes": 23230304,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2023-12",
+      "status": "ok",
+      "bytes": 24791132,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2024-01",
+      "status": "ok",
+      "bytes": 25513520,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2024-02",
+      "status": "ok",
+      "bytes": 23189214,
+      "n": 2505600,
+      "n_valid": 2505600,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2024-03",
+      "status": "ok",
+      "bytes": 29327187,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2024-04",
+      "status": "ok",
+      "bytes": 25854649,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2024-05",
+      "status": "ok",
+      "bytes": 23708712,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2024-06",
+      "status": "ok",
+      "bytes": 21289061,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2024-07",
+      "status": "ok",
+      "bytes": 23725804,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2024-08",
+      "status": "ok",
+      "bytes": 24789867,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2024-09",
+      "status": "ok",
+      "bytes": 21979190,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2024-10",
+      "status": "ok",
+      "bytes": 23428494,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2024-11",
+      "status": "ok",
+      "bytes": 27629796,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2024-12",
+      "status": "ok",
+      "bytes": 27521946,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2025-01",
+      "status": "ok",
+      "bytes": 26475015,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2025-02",
+      "status": "ok",
+      "bytes": 23195533,
+      "n": 2419200,
+      "n_valid": 2419200,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2025-03",
+      "status": "ok",
+      "bytes": 26494268,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2025-04",
+      "status": "ok",
+      "bytes": 23626408,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2025-05",
+      "status": "ok",
+      "bytes": 23350685,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2025-06",
+      "status": "ok",
+      "bytes": 20800624,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2025-07",
+      "status": "ok",
+      "bytes": 21942678,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2025-08",
+      "status": "ok",
+      "bytes": 22057248,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2025-09",
+      "status": "ok",
+      "bytes": 19845361,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2025-10",
+      "status": "ok",
+      "bytes": 24195403,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2025-11",
+      "status": "ok",
+      "bytes": 25079023,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2025-12",
+      "status": "ok",
+      "bytes": 22637377,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2026-01",
+      "status": "ok",
+      "bytes": 21735346,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2026-02",
+      "status": "ok",
+      "bytes": 24710169,
+      "n": 2419200,
+      "n_valid": 2419200,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2026-03",
+      "status": "ok",
+      "bytes": 24068030,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2026-04",
+      "status": "ok",
+      "bytes": 20584784,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2026-05",
+      "status": "ok",
+      "bytes": 19601295,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2026-06",
+      "status": "ok",
+      "bytes": 21966785,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2026-07",
+      "status": "ok",
+      "bytes": 20930221,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2026-08",
+      "status": "ok",
+      "bytes": 19774985,
+      "n": 2678400,
+      "n_valid": 2678400,
+      "gap_pct": 0.0,
+      "source": "monthly"
+    },
+    {
+      "month": "2026-09",
+      "status": "ok",
+      "bytes": 20644266,
+      "n": 2592000,
+      "n_valid": 2592000,
+      "gap_pct": 0.0,
+      "source": "daily"
+    },
+    {
+      "month": "2026-10",
+      "status": "ok",
+      "bytes": 2017570,
+      "n": 259200,
+      "n_valid": 259200,
+      "gap_pct": 0.0,
+      "source": "daily"
+    }
+  ],
+  "total_bytes": 2190916316,
+  "n_shards": 82,
+  "elapsed_s": 3182.6
+}

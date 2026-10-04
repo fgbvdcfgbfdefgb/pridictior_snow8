@@ -106,7 +106,7 @@ class ReplayAnimator:
 
         # accuracy bars
         axb = self.ax_bar
-        axb.set_title("Live accuracy  ·  100·(1−nRMSE) vs real tape",
+        axb.set_title("Live accuracy  ·  25-min direction vs real tape",
                       loc="left", fontsize=11, color="#9fb0c9")
         y = np.arange(self.M)
         self.bars = axb.barh(y, np.zeros(self.M),
@@ -116,9 +116,14 @@ class ReplayAnimator:
         axb.set_xlim(0, 100)
         axb.invert_yaxis()
         axb.grid(True, axis="x", alpha=0.22, linewidth=0.6)
-        axb.set_xlabel("accuracy %")
-        self.bar_txt = [axb.text(1.5, i, "", va="center", ha="left", fontsize=9.5,
-                                 color=BG, fontweight="bold") for i in range(self.M)]
+        axb.axvline(50, color="#94a3b8", lw=1.1, ls=":", alpha=0.95, zorder=5)
+        axb.set_xlabel("directional hit-rate %   (50 = coin flip)")
+        # Labels ride just past the tip of each bar rather than sitting inside
+        # it: a bar near 0% is too short to contain text, and dark-on-dark text
+        # simply disappears. Light ink on the panel background always reads.
+        self.bar_txt = [axb.text(2.0, i, "", va="center", ha="left", fontsize=9.5,
+                                 color="#dbe6f5", fontweight="bold")
+                        for i in range(self.M)]
 
         # rolling error history
         axe = self.ax_err
@@ -186,11 +191,18 @@ class ReplayAnimator:
         self.sub.set_text(f"{ts:%Y-%m-%d  %H:%M:%S} UTC     "
                           f"BTC {p_now:,.2f}     forecast horizon 25 min")
 
+        # Bar = rolling directional hit-rate: always on a 0-100 scale and
+        # directly interpretable against the 50% coin-flip line. Path nRMSE is
+        # annotated alongside (1.00 = no better than "price stays put").
         acc = self.sc["roll_acc"][:, k]
         hit = self.sc["roll_hit"][:, k] * 100.0
+        nrm = self.sc["roll_nrmse"][:, k]
         for i, b in enumerate(self.bars):
-            b.set_width(float(acc[i]))
-            self.bar_txt[i].set_text(f"{acc[i]:5.1f}%   hit {hit[i]:4.1f}%")
+            b.set_width(float(hit[i]))
+            self.bar_txt[i].set_text(
+                f"hit {hit[i]:.1f}%   ·   nRMSE {nrm[i]:.2f}")
+            # clamp so a long bar never pushes its own label off the panel
+            self.bar_txt[i].set_x(min(float(hit[i]) + 2.0, 58.0))
 
         kk = slice(0, k + 1)
         tx = (self.times[kk] - self.times[0]) / 3600.0

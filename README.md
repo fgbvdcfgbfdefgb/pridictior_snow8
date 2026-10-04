@@ -238,8 +238,9 @@ renders:
   of "now", with the ensemble quantile band shaded;
 * the real tape over the forecast span, drawn faint, so you can watch the
   dotted line be right or wrong;
-* a **live accuracy bar per model**, `100·(1 − nRMSE)` against the stored real
-  data, plus rolling directional hit-rate.
+* a **live accuracy bar per model** — rolling directional hit-rate against the
+  stored real tape, with a dotted 50% coin-flip reference and the path nRMSE
+  annotated beside it — plus the rolling hit-rate history for the session.
 
 `--pred-stride 20 --frame-stride 1` turns a 24-hour session into 4 320 frames =
 2 min 24 s at 30 fps. `--pred-stride 1` predicts every single second (86 400
@@ -254,6 +255,70 @@ A JSON scorecard is written next to the video:
 
 `stability_jump_sigma` is the median change in the 25-minute point forecast from
 one second to the next, in σ units — the direct measure of "no erratic jumps".
+
+Rendering is split from inference. `--save-npz replay.npz` caches the replay
+tensors; `--load-npz replay.npz` redraws the figure without touching the store
+or the checkpoints, which turns a plot tweak from a 7-minute round trip into a
+2-minute one.
+
+### The committed sample — what it is, and what it is not
+
+`media/sample_replay.mp4` (48 s, 1 440 frames at 30 fps) is a real run of this
+pipeline, not a mock-up. It is also deliberately a **weak** one, because it was
+produced entirely on 2 CPU cores with no GPU:
+
+| | demo in this repo | what the code is built for |
+|---|---|---|
+| hardware | 2 CPU cores | 4 × A10, 23 GB each |
+| models | `micro` 2.9 M, `mini` 1.1 M, `nano` 0.47 M | 480 M params across 4 GPUs |
+| context | 3 h (10 800 s) | 12 h (43 200 s) |
+| training | ~8 min per model | hours, `--max-hours 8` |
+| data | 3 months materialised | full 2020–2026 history |
+
+Replayed over the most volatile day in that slice — 2026-08-20, 9.5% intraday
+range — the honest scorecard is:
+
+| model | directional hit | path nRMSE | stability (σ) |
+|---|---|---|---|
+| micro | 47.9% | 1.040 | 0.012 |
+| mini  | 49.8% | 1.045 | 0.033 |
+| nano  | 50.2% | 1.067 | 0.042 |
+
+That is **chance**, and `nRMSE > 1` means all three are slightly worse than
+assuming the price simply stays put. This is the expected result for eight
+CPU-minutes of training and it is reported rather than hidden, for one reason:
+the same training loop prints a ~79% hit rate on its own in-flight batches. The
+gap between those two numbers is the whole lesson. With `--stride 10` the
+training windows overlap by ~100%, so consecutive samples are nearly the same
+sample, and the in-training metric measures memorisation of an autocorrelated
+window rather than skill. Only the settled replay in §6 — scored against the
+stored real tape at a fixed 25-minute lag — is a real number.
+
+What the sample *does* demonstrate is that every stage runs end to end and
+agrees with itself: shards → analyser → per-second predictor → realtime reward
+→ holdout replay → 30 fps animation, with forecasts that stay smooth
+(`stability_jump_sigma` of 0.01–0.04σ, i.e. no erratic jumps) even while being
+directionally wrong. Smoothness is a property of the KL output head, so it
+survives undertraining; accuracy is not, so it does not.
+
+Reproducing the sample exactly (about 30 minutes, CPU only, no GPU required):
+
+```bash
+# 3 months of store instead of 6 years -- 1.2 GB, ~2 min
+python scripts/materialize.py --shards data/shards --out /tmp/demostore \
+    --workers 1 --chunk 150000 --feature-dtype float16 \
+    --start 2026-07-01 --end 2026-10-04 --verify
+
+# ~8 min per model on 2 cores
+for v in micro mini nano; do
+  python scripts/train.py --store /tmp/demostore --out runs/demo --variant $v \
+      --batch 8 --stride 10 --context 10800 --max-hours 0.14 --amp off
+done
+
+python scripts/render_video.py --store /tmp/demostore --ckpt-dir runs/demo \
+    --day 2026-08-20 --hours 12 --pred-stride 30 --frame-stride 1 --batch 24 \
+    --lookback-min 120 --fps 30 --roll 120 --out media/sample_replay.mp4
+```
 
 ---
 
@@ -314,6 +379,11 @@ lookahead. The two tests in `tests/` exist specifically to catch that class of
 error, and `settle()` being the only forward-looking call in the simulator is
 the structural guard.
 
+The demo numbers above are the concrete illustration: 47.9–50.2% directional
+accuracy is exactly the "close to the noise floor" result this section predicts,
+and the ~79% figure the training loop reports is exactly the kind of number this
+section tells you to distrust.
+
 Nothing here is financial advice or a trading system.
 
 ## 8. Tests
@@ -321,4 +391,11 @@ Nothing here is financial advice or a trading system.
 ```bash
 python tests/test_feature_parity.py   # vectorised vs streaming, causality
 python tests/test_pipeline.py         # btcz round-trip, model shapes, loss, basis
+python scripts/smoke_test.py --video  # whole pipeline on synthetic data, ~17 s
 ```
+
+`materialize.py --verify` is the other check worth running: it recomputes the
+analyser across a chunk boundary and compares against the stored features, which
+is what proves the 4.5-day warm-up is long enough for chunked materialisation to
+be seamless. It currently reports a max absolute difference of **2.1e-03**
+against a tolerance of 2e-02, the residual being float16 quantisation.

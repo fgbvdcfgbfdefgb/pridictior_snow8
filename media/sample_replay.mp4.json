@@ -1,0 +1,33 @@
+{
+  "session_start": "2026-08-20 00:00:00",
+  "session_end": "2026-08-20 11:59:30",
+  "pred_stride_s": 30,
+  "frames": 1440,
+  "fps": 30,
+  "models": [
+    {
+      "model": "micro",
+      "dir_hit_pct": 47.85,
+      "path_nrmse": 1.04,
+      "endpoint_nrmse": 1.4668,
+      "accuracy_pct": 44.68,
+      "stability_jump_sigma": 0.01205
+    },
+    {
+      "model": "mini",
+      "dir_hit_pct": 49.79,
+      "path_nrmse": 1.0447,
+      "endpoint_nrmse": 1.4654,
+      "accuracy_pct": 44.59,
+      "stability_jump_sigma": 0.03275
+    },
+    {
+      "model": "nano",
+      "dir_hit_pct": 50.21,
+      "path_nrmse": 1.0674,
+      "endpoint_nrmse": 1.4787,
+      "accuracy_pct": 43.48,
+      "stability_jump_sigma": 0.04233
+    }
+  ]
+}
