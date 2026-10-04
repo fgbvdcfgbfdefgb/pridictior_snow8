@@ -1,0 +1,21 @@
+# Derived artefacts -- rebuild with scripts/materialize.py
+store/
+*.bin
+!data/shards/*.btcz
+
+# Training output
+runs/
+*.pt
+*.ckpt
+
+# Rendered media is large; the committed sample lives in media/
+media/*.mp4
+!media/sample_replay.mp4
+
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+.DS_Store
+*.egg-info/

@@ -1,0 +1,14 @@
+# Core runtime. Everything here is available from PyPI, which is the only
+# network access the Snowflake container needs -- no market-data downloads
+# happen at train time.
+numpy>=1.26
+scipy>=1.11
+pandas>=2.0
+zstandard>=0.22
+matplotlib>=3.8
+imageio>=2.34
+imageio-ffmpeg>=0.4.9
+
+# torch is intentionally NOT pinned here: Snowflake's GPU container runtime
+# ships a CUDA build already. Only install it yourself if `import torch` fails:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu121

@@ -1,0 +1,2 @@
+*.btcz binary -diff -merge
+*.mp4  binary -diff -merge
