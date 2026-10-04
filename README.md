@@ -9,6 +9,14 @@ real market.
 Built to run **fully offline on Snowflake** — 4 × A10G (23 GB), 48 vCPU, 100 GB
 RAM. The only network access needed at run time is `pip install`.
 
+**▶ Sample output:
+[`media/sample_replay.mp4`](https://github.com/fgbvdcfgbfdefgb/pridictior_snow8/raw/main/media/sample_replay.mp4)**
+— 48 s at 30 fps, three models forecasting 25 minutes ahead through the most
+volatile day in the demo slice. It was trained for 8 CPU-minutes per model and
+scores at chance; [read why that is the honest and expected
+result](#the-committed-sample--what-it-is-and-what-it-is-not) before drawing
+conclusions from it.
+
 ---
 
 ## TL;DR
