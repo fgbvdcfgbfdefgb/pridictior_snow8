@@ -45,16 +45,23 @@ Or open `notebooks/snowflake_btc_predictor.ipynb` and run it top to bottom.
 |---|---|
 | Source | Binance Data Vision, 1 s spot klines |
 | Span | 2020-01-01 00:00:00 → 2026-10-03 23:59:59 UTC |
-| Rows | ~213 million consecutive seconds |
+| Rows | **213,235,200** consecutive seconds, no holes |
 | Raw size | ~29 GB of CSV / ~6.9 GB of Binance zips |
-| In this repo | ~2.1 GB |
+| In this repo | **2.19 GB** (10.3 bytes per second of market) |
+| Largest file | 38.9 MB (GitHub's cap is 100 MB) |
+| Genuinely reported | 213,086,061 s — **99.930%** |
+| Forward-filled | 149,139 s — 0.070%, flagged in the `valid` bitmask |
 | Fidelity | **bit-exact** for OHLC, volume and trade count |
 
 The grid is *dense*: every second exists. Seconds the exchange never reported
-(roughly 0–0.5% per month, mostly 2020 maintenance windows) are forward-filled
-as flat candles and flagged in a `valid` bitmask, so a fixed 43 200-step window
-is always well-defined while the model can still tell a real bar from a filled
-one.
+are forward-filled as flat candles and flagged in a `valid` bitmask, so a fixed
+43 200-step window is always well-defined while the model can still tell a real
+bar from a filled one. Gaps are concentrated in 2020 (worst month 2020-02 at
+0.99%); 62 of the 82 months have none at all.
+
+`ShardIndex` refuses to load a directory whose months do not butt up exactly
+against each other, so a partial download fails loudly instead of training on a
+silently discontinuous timeline.
 
 ### Why a custom container and not Parquet
 

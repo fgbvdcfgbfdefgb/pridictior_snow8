@@ -24,12 +24,14 @@ are therefore invisible in the output -- ``--verify`` checks exactly that.
 from __future__ import annotations
 
 import argparse
-import concurrent.futures as cf
+import gc
 import json
+import multiprocessing as mp
 import os
 import sys
 import time
 from pathlib import Path
+from typing import List, Tuple
 
 import numpy as np
 
@@ -74,6 +76,7 @@ def _worker(task) -> dict:
         m.flush()
     store.features.flush()
     del store, index, d, feats
+    gc.collect()
     return {"a": a, "b": b, "sec": b - a, "warm": ctx, "s": round(time.time() - t0, 1)}
 
 
@@ -111,18 +114,40 @@ def main() -> int:
                       a.feature_dtype))
     print(f"{len(tasks)} chunks on {a.workers} workers", flush=True)
 
+    # One fresh OS process per chunk, `workers` of them in flight.
+    #
+    # Writing to a memmap leaves dirty pages charged to the writing process, so
+    # a long-lived worker's RSS grows without bound across chunks until the
+    # kernel kills it.  A ProcessPoolExecutor with max_tasks_per_child was the
+    # obvious fix but it can hang if a child dies mid-recycle, which is exactly
+    # the failure we are trying to survive.  Spawning explicitly keeps memory
+    # bounded *and* turns any crash into a loud, attributable error.
     t0 = time.time()
     done = 0
-    if a.workers == 1:
-        for t in tasks:
-            r = _worker(t)
+    pending = list(tasks)
+    running: List[Tuple[mp.Process, dict]] = []
+    while pending or running:
+        while pending and len(running) < a.workers:
+            task = pending.pop(0)
+            p = mp.Process(target=_worker, args=(task,), daemon=False)
+            p.start()
+            running.append((p, {"a": task[2], "b": task[3]}))
+        time.sleep(0.05)
+        for p, info in running[:]:
+            if p.is_alive():
+                continue
+            running.remove((p, info))
+            if p.exitcode != 0:
+                killed = p.exitcode == -9 or p.exitcode == 137
+                raise SystemExit(
+                    f"chunk {utc(info['a'])} failed (exit {p.exitcode})"
+                    + (f"\n  -> the worker was OOM-killed. Lower --chunk "
+                       f"(now {a.chunk:,}) or --workers (now {a.workers})."
+                       if killed else ""))
             done += 1
-            print(f"  [{done}/{len(tasks)}] {utc(r['a'])} {r['s']}s", flush=True)
-    else:
-        with cf.ProcessPoolExecutor(max_workers=a.workers) as ex:
-            for r in ex.map(_worker, tasks):
-                done += 1
-                print(f"  [{done}/{len(tasks)}] {utc(r['a'])} {r['s']}s", flush=True)
+            eta = (time.time() - t0) / max(done, 1) * (len(tasks) - done)
+            print(f"  [{done}/{len(tasks)}] {utc(info['a'])}  eta {eta/60:.1f}m",
+                  flush=True)
 
     store = MarketStore(a.out)
     total = sum((Path(a.out) / f"{c}.bin").stat().st_size for c in RAW_COLUMNS)

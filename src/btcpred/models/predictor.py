@@ -91,11 +91,22 @@ def kl_basis(horizon: int, n_basis: int, device=None, dtype=torch.float32) -> to
 class PatchEmbed(nn.Module):
     """Average-pool a window level to its stride, then embed fixed-size patches."""
 
-    def __init__(self, c_in: int, d_model: int, span: int, stride: int, patch: int):
+    def __init__(self, c_in: int, d_model: int, span: int, stride: int, patch: int,
+                 context: int | None = None):
         super().__init__()
+        # A level can never reach further back than the window actually given.
+        # Clamping here (rather than trusting the config) is what lets --context
+        # be overridden for short-context experiments without the positional
+        # embedding silently desynchronising from the real token count.
+        if context is not None:
+            span = min(span, context)
         self.span, self.stride, self.patch = span, stride, patch
         self.n_steps = span // stride
         self.n_tokens = self.n_steps // patch
+        if self.n_tokens < 1:
+            raise ValueError(
+                f"pyramid level (span={span}, stride={stride}, patch={patch}) "
+                f"yields no tokens; lower the stride or raise the context")
         self.proj = nn.Conv1d(c_in, d_model, kernel_size=patch, stride=patch)
         self.norm = nn.LayerNorm(d_model)
 
@@ -138,7 +149,7 @@ class PricePredictor(nn.Module):
         d = cfg.d_model
 
         self.embeds = nn.ModuleList([
-            PatchEmbed(cfg.in_channels, d, span, stride, patch)
+            PatchEmbed(cfg.in_channels, d, span, stride, patch, context=cfg.context)
             for (span, stride, patch) in cfg.levels
         ])
         self.level_emb = nn.Parameter(torch.zeros(len(cfg.levels), d))
@@ -193,6 +204,8 @@ class PricePredictor(nn.Module):
 
         nn.init.zeros_(self.head[-1].weight)
         nn.init.zeros_(self.head[-1].bias)
+        if self.basis.is_meta:
+            return          # sizing-only instantiation; no real tensors to read
 
         # value at h=H of a path built from an all-ones coefficient vector
         unit = float(self.basis[-1].sum())
@@ -370,6 +383,8 @@ RECIPES: Dict[str, Dict] = {
                   dropout=0.05, lr=2.5e-4, stab=0.25, tilt=0.65, wd=0.02),
     "agile": dict(name="agile", d_model=512,  depth=14, n_heads=8,  n_basis=40,
                   dropout=0.15, lr=5.0e-4, stab=0.20, tilt=0.80, wd=0.01),
+    "mini":  dict(name="mini",  d_model=128,  depth=3,  n_heads=4,  n_basis=20,
+                  dropout=0.05, lr=8.0e-4, stab=0.25, tilt=0.65, wd=0.01),
     "micro": dict(name="micro", d_model=192,  depth=4,  n_heads=6,  n_basis=16,
                   dropout=0.05, lr=6.0e-4, stab=0.30, tilt=0.50, wd=0.01),
     "nano":  dict(name="nano",  d_model=96,   depth=2,  n_heads=4,  n_basis=12,

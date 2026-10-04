@@ -160,6 +160,22 @@ def test_stability_term_alignment():
     assert abs(a["stab"] - b["stab"]) < 1e-6, (a["stab"], b["stab"])
     print(f"stability OK  self-consistent=0 for shifts 1/3/10, masking exact")
 
+def test_context_override_token_count():
+    """Shrinking --context must keep the positional embedding in sync."""
+    import torch
+    from btcpred.models.inputs import WindowNormalizer
+    from btcpred.models.predictor import make_config, PricePredictor
+    for ctx in (43200, 10800, 4096):
+        cfg, _, _ = make_config("nano", n_features=59)
+        cfg = type(cfg)(**{**cfg.to_dict(), "context": ctx, "horizon": 200})
+        m = PricePredictor(cfg)
+        raw = torch.randn(2, 7, ctx) * 1e-3
+        raw[:, 6] = 1.0
+        sig = torch.full((2,), 1e-4)
+        out = m(WindowNormalizer()(raw, sig), torch.randn(2, 59), sig)
+        assert out.shape == (2, 3, 200), (ctx, out.shape)
+        print(f"  context {ctx:6d} -> {m.n_window_tokens:3d} window tokens  OK")
+
 
 if __name__ == "__main__":
     test_btcz_roundtrip()
@@ -167,4 +183,5 @@ if __name__ == "__main__":
     test_model_shapes_and_loss()
     test_anchor_continuity()
     test_stability_term_alignment()
+    test_context_override_token_count()
     print("ALL OK")
