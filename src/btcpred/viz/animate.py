@@ -143,6 +143,10 @@ class ReplayAnimator:
 
         lo = t_now - self.lookback
         m = (self.tape_t >= lo) & (self.tape_t <= t_now)
+        if not m.any():                       # not enough history padded in
+            m = self.tape_t <= t_now
+            if not m.any():
+                m = np.zeros_like(m); m[0] = True
         xs = (self.tape_t[m] - t_now) / 60.0
         self.l_actual.set_data(xs, self.tape_p[m])
 

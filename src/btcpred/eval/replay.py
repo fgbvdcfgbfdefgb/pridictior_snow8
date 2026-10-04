@@ -68,7 +68,7 @@ def _gather_windows(store: MarketStore, times: np.ndarray, context: int) -> np.n
 def replay_day(store: MarketStore, models: List[LoadedModel], t_start: int,
                t_stop: int, device: torch.device, pred_stride: int = 20,
                batch: int = 32, horizon: int = 1500, context: int = 43200,
-               progress: bool = True) -> Dict[str, np.ndarray]:
+               tape_pad: int = 7200, progress: bool = True) -> Dict[str, np.ndarray]:
     """Predict every ``pred_stride`` seconds over ``[t_start, t_stop)``."""
     lo = max(t_start, store.t0 + context + 1)
     hi = min(t_stop, store.t_end - horizon + 1)
@@ -109,8 +109,14 @@ def replay_day(store: MarketStore, models: List[LoadedModel], t_start: int,
                     - float(lp[i])).astype(np.float32)
 
     price = np.asarray(store.cols["close"][i0], dtype=np.float32)
-    # the actual traded price for the whole rendered span, 1 Hz
-    span_i = np.arange(lo - store.t0, min(hi + horizon, store.n) - store.t0)
+    # The actual traded price over the whole rendered span at 1 Hz, padded
+    # *backwards* so the very first frame already has scrolling history behind
+    # it, and forwards by one horizon so the last frame's forecast can be
+    # compared against real tape.  (These are store indices, not timestamps --
+    # mixing the two silently produces an empty span.)
+    i_lo = max(0, lo - tape_pad - store.t0)
+    i_hi = min(hi + horizon - store.t0, store.n)
+    span_i = np.arange(i_lo, i_hi, dtype=np.int64)
     tape_t = (span_i + store.t0).astype(np.int64)
     tape_p = np.asarray(store.cols["close"][span_i], dtype=np.float32)
 
