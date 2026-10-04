@@ -129,9 +129,42 @@ def test_anchor_continuity():
     print(f"anchor OK  |path[h=1]|={step0:.2e} vs |path[H]|={typical:.2e}")
 
 
+
+
+def test_stability_term_alignment():
+    """A perfectly self-consistent forecast must give zero stability loss."""
+    import torch
+    from btcpred.models.predictor import PredictionLoss, make_config
+
+    H, B, Q = 120, 4, 3
+    cfg, lw, _ = make_config("nano", n_features=59)
+    cfg = type(cfg)(**{**cfg.to_dict(), "horizon": H})
+    crit = PredictionLoss(cfg, lw)
+    sig = torch.full((B,), 1e-4)
+
+    for shift in (1, 3, 10):
+        # a single underlying path; prev was made `shift` seconds earlier
+        full = torch.cumsum(torch.randn(B, Q, H + shift) * 1e-4, dim=-1)
+        full, _ = torch.sort(full, dim=1)                 # keep quantiles ordered
+        prev = full[:, :, :H]
+        now = full[:, :, shift:shift + H] - full[:, :, shift - 1:shift]
+        _, st = crit(now, torch.zeros(B, H), sig, prev_pred=prev, shift=shift)
+        assert st["stab"] < 1e-10, f"shift={shift}: expected 0, got {st['stab']}"
+
+    # a wrapped cursor must be excluded, not pulled toward zero
+    prev = torch.randn(B, Q, H) * 1e-3
+    now = torch.randn(B, Q, H) * 1e-3
+    mask = torch.tensor([1.0, 0.0, 1.0, 0.0])
+    _, a = crit(now, torch.zeros(B, H), sig, prev_pred=prev, prev_mask=mask, shift=1)
+    _, b = crit(now[::2], torch.zeros(2, H), sig[::2], prev_pred=prev[::2], shift=1)
+    assert abs(a["stab"] - b["stab"]) < 1e-6, (a["stab"], b["stab"])
+    print(f"stability OK  self-consistent=0 for shifts 1/3/10, masking exact")
+
+
 if __name__ == "__main__":
     test_btcz_roundtrip()
     test_kl_basis_properties()
     test_model_shapes_and_loss()
     test_anchor_continuity()
+    test_stability_term_alignment()
     print("ALL OK")

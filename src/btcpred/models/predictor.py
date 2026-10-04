@@ -298,7 +298,9 @@ class PredictionLoss(nn.Module):
                         if 0.5 in cfg.quantiles else len(cfg.quantiles) // 2)
 
     def forward(self, pred: torch.Tensor, truth: torch.Tensor, sigref: torch.Tensor,
-                prev_pred: torch.Tensor | None = None) -> Tuple[torch.Tensor, Dict[str, float]]:
+                prev_pred: torch.Tensor | None = None,
+                prev_mask: torch.Tensor | None = None,
+                shift: int = 1) -> Tuple[torch.Tensor, Dict[str, float]]:
         """``pred`` (B,Q,H) and ``truth`` (B,H) are cumulative log-returns."""
         B, Q, H = pred.shape
         scale = (sigref.clamp_min(1e-8) * math.sqrt(H)).view(B, 1, 1)
@@ -317,13 +319,22 @@ class PredictionLoss(nn.Module):
         conf = torch.tanh(d_pred / (scale.view(B, 1) * 0.5))
         l_dir = F.softplus(-conf * torch.sign(d_true) * 4.0).mean()
 
+        # Stability: the forecast made `shift` seconds ago, re-anchored to now,
+        # is what this forecast should look like.  prev_pred[k] is the previous
+        # cursor's prediction for h'=k+1; the point that lands on absolute time
+        # t+h is k = h-1+shift, and its anchor (absolute time t) is k = shift-1.
         l_stab = pred.new_zeros(())
-        if prev_pred is not None:
-            # prev_pred was made one second earlier: its h+1 is our h
-            shifted = prev_pred[:, :, 1:]
-            anchor = prev_pred[:, :, :1]
-            tgt = (shifted - anchor).detach()
-            l_stab = (((pred[:, :, :H - 1] - tgt) / scale) ** 2).mean()
+        if prev_pred is not None and shift < H:
+            tgt = (prev_pred[:, :, shift:]
+                   - prev_pred[:, :, shift - 1:shift]).detach()
+            d = ((pred[:, :, :H - shift] - tgt) / scale) ** 2
+            if prev_mask is None:
+                l_stab = d.mean()
+            else:
+                # cursors that wrapped have no meaningful predecessor: drop
+                # those rows entirely rather than pulling them toward zero
+                w = prev_mask.view(-1, 1, 1).to(d.dtype)
+                l_stab = (d * w).sum() / w.sum().clamp_min(1.0) / (d.shape[1] * d.shape[2])
 
         curv = med[:, 2:] - 2 * med[:, 1:-1] + med[:, :-2]
         l_sm = ((curv / scale.squeeze(1)) ** 2).mean() * H

@@ -183,14 +183,14 @@ class OnlineTrainer:
         with ctx:
             x = self.norm(win_t, sig_t)
             pred = self.model(x, feats_t, sig_t)
-            prev = None
-            if self.prev_pred is not None and self.prev_pred.shape == pred.shape:
-                prev = self.prev_pred * cont_t.view(-1, 1, 1)
-                pred_masked = pred * cont_t.view(-1, 1, 1)
-            else:
-                pred_masked = pred
-            loss, stats = self.crit(pred.float(), truth_t.float(), sig_t.float(),
-                                    prev_pred=None if prev is None else prev.float())
+            prev = (self.prev_pred
+                    if self.prev_pred is not None
+                    and self.prev_pred.shape == pred.shape else None)
+            loss, stats = self.crit(
+                pred.float(), truth_t.float(), sig_t.float(),
+                prev_pred=None if prev is None else prev.float(),
+                prev_mask=None if prev is None else cont_t,
+                shift=self.tcfg.stride)
 
         self.opt.zero_grad(set_to_none=True)
         if self.scaler.is_enabled():
